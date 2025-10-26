@@ -1,0 +1,583 @@
+.order-status-page {
+  min-height: 100vh;
+  background: var(--color-background);
+  padding: var(--space-20) var(--space-16);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* Loading State */
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  gap: var(--space-16);
+}
+
+.spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid var(--color-secondary);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.loading-state p {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-base);
+}
+
+/* Error State */
+.error-state {
+  text-align: center;
+  padding: var(--space-32);
+}
+
+.error-state h2 {
+  margin-bottom: var(--space-16);
+  color: var(--color-text);
+}
+
+.error-state p {
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-24);
+}
+
+/* Success Header */
+.success-header {
+  text-align: center;
+  padding: var(--space-32) 0 var(--space-20);
+  animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.success-icon-wrapper {
+  display: inline-block;
+  margin-bottom: var(--space-16);
+  animation: scaleIn 0.4s ease-out 0.2s both;
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+.success-icon {
+  color: var(--color-success);
+  stroke-width: 2;
+  filter: drop-shadow(0 4px 12px rgba(var(--color-success-rgb), 0.3));
+}
+
+.success-header h1 {
+  font-size: var(--font-size-3xl);
+  margin-bottom: var(--space-8);
+  color: var(--color-text);
+}
+
+.success-message {
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+/* Download CTA Banner */
+.download-cta-banner {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-teal-600));
+  border-radius: var(--radius-lg);
+  padding: var(--space-20);
+  display: flex;
+  align-items: center;
+  gap: var(--space-16);
+  margin-bottom: var(--space-20);
+  box-shadow: var(--shadow-lg);
+  animation: fadeInUp 0.6s ease-out 0.1s both;
+  position: relative;
+  overflow: hidden;
+}
+
+.download-cta-banner::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -30px;
+  width: 120px;
+  height: 200%;
+  background: rgba(255, 255, 255, 0.1);
+  transform: rotate(15deg);
+}
+
+.cta-icon {
+  background: rgba(255, 255, 255, 0.2);
+  padding: var(--space-12);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  flex-shrink: 0;
+}
+
+.cta-text {
+  flex: 1;
+}
+
+.cta-text h3 {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: white;
+  margin: 0 0 var(--space-4) 0;
+}
+
+.cta-text p {
+  font-size: var(--font-size-sm);
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0;
+}
+
+.btn-download-cta {
+  background: white;
+  color: var(--color-primary);
+  border: none;
+  padding: var(--space-10) var(--space-20);
+  border-radius: var(--radius-base);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-standard);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  flex-shrink: 0;
+}
+
+.btn-download-cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.btn-download-cta:active {
+  transform: translateY(0);
+}
+
+.btn-download-cta:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Receipt Container */
+.receipt-container {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  margin-bottom: var(--space-16);
+  animation: fadeInUp 0.6s ease-out 0.2s both;
+}
+
+/* Order Info Card */
+.order-info-card {
+  background: var(--color-surface);
+  padding: var(--space-20);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.order-header {
+  display: flex;
+  justify-content: space-between;
+  padding-bottom: var(--space-16);
+  border-bottom: 1px solid var(--color-border);
+  margin-bottom: var(--space-16);
+}
+
+.label {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: var(--space-4);
+}
+
+.order-number {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-primary);
+  font-family: var(--font-family-mono);
+}
+
+.table-number-badge {
+  background: var(--color-primary);
+  color: var(--color-btn-primary-text);
+  padding: var(--space-6) var(--space-16);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  display: inline-block;
+  margin-top: var(--space-4);
+}
+
+.order-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-12);
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.status-badge {
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+  padding: var(--space-6) var(--space-12);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+}
+
+.status-preparing {
+  background: rgba(var(--color-warning-rgb), 0.15);
+  color: var(--color-warning);
+  border: 1px solid rgba(var(--color-warning-rgb), 0.3);
+}
+
+/* Order Details Card */
+.order-details-card {
+  background: var(--color-surface);
+  padding: var(--space-20);
+}
+
+.order-details-card h2 {
+  font-size: var(--font-size-xl);
+  margin-bottom: var(--space-16);
+  color: var(--color-text);
+}
+
+.order-items-list {
+  margin-bottom: var(--space-20);
+}
+
+.order-item-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: var(--space-12) 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.order-item-row:last-child {
+  border-bottom: none;
+}
+
+.item-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.item-name-wrapper {
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+}
+
+.item-name {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text);
+}
+
+.veg-badge-tiny {
+  background: rgba(34, 197, 94, 0.9);
+  color: white;
+  padding: 2px;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.item-quantity {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.item-price {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+}
+
+/* Bill Breakdown */
+.bill-breakdown {
+  background: var(--color-background);
+  border-radius: var(--radius-base);
+  padding: var(--space-16);
+  margin-top: var(--space-16);
+}
+
+.bill-row {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--space-8) 0;
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+}
+
+.bill-row:not(:last-child) {
+  border-bottom: 1px dashed var(--color-border);
+}
+
+.bill-total {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text);
+  padding-top: var(--space-12);
+  margin-top: var(--space-8);
+}
+
+.payment-success-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-8);
+  margin-top: var(--space-16);
+  padding: var(--space-12);
+  background: rgba(var(--color-success-rgb), 0.1);
+  border: 1px solid rgba(var(--color-success-rgb), 0.3);
+  border-radius: var(--radius-base);
+  color: var(--color-success);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* Restaurant Info Footer */
+.restaurant-info-footer {
+  text-align: center;
+  padding: var(--space-20);
+  border-top: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.restaurant-info-footer h3 {
+  font-size: var(--font-size-xl);
+  margin-bottom: var(--space-4);
+  color: var(--color-text);
+}
+
+.restaurant-info-footer p {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin: var(--space-4) 0;
+}
+
+.contact-info {
+  font-size: var(--font-size-xs) !important;
+}
+
+/* Instructions Card */
+.instructions-card {
+  background: var(--color-bg-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-16);
+  display: flex;
+  gap: var(--space-12);
+  margin-bottom: var(--space-16);
+  animation: fadeInUp 0.6s ease-out 0.4s both;
+}
+
+.instructions-card svg {
+  flex-shrink: 0;
+  color: var(--color-warning);
+  margin-top: var(--space-4);
+}
+
+.instructions-card h3 {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  margin: 0 0 var(--space-4) 0;
+  color: var(--color-text);
+}
+
+.instructions-card p {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Action Buttons */
+.action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+  margin-bottom: var(--space-20);
+}
+
+.btn--full-width {
+  width: 100%;
+}
+
+/* Footer Note */
+.footer-note {
+  text-align: center;
+  padding: var(--space-20) 0;
+}
+
+.footer-note p {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin: var(--space-4) 0;
+}
+
+.estimate {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-primary) !important;
+}
+
+/* Responsive */
+@media (min-width: 640px) {
+  .order-status-page {
+    padding: var(--space-32) var(--space-20);
+  }
+  
+  .success-header {
+    padding: var(--space-32) 0 var(--space-24);
+  }
+  
+  .success-icon {
+    width: 80px;
+    height: 80px;
+  }
+
+  .download-cta-banner {
+    padding: var(--space-24);
+  }
+}
+
+/* Timestamp footer */
+.timestamp-footer {
+  font-size: var(--font-size-xs) !important;
+  color: var(--color-text-secondary) !important;
+  margin-top: var(--space-8) !important;
+  padding-top: var(--space-8);
+  border-top: 1px solid var(--color-border);
+}
+
+/* Make receipt container stable for capture */
+.receipt-container {
+  position: relative;
+  /* Remove animations from receipt container */
+  animation: none !important;
+}
+
+.receipt-container * {
+  /* Ensure all children are fully rendered */
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+/* Image Upload Container */
+.image-upload-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+}
+
+.upload-tabs {
+  display: flex;
+  gap: var(--space-8);
+  background: var(--color-background);
+  padding: var(--space-4);
+  border-radius: var(--radius-base);
+  border: 1px solid var(--color-border);
+}
+
+.upload-tab {
+  flex: 1;
+  padding: var(--space-8) var(--space-12);
+  border: none;
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-standard);
+}
+
+.upload-tab:hover {
+  background: var(--color-secondary);
+  color: var(--color-text);
+}
+
+.upload-tab.active {
+  background: var(--color-primary);
+  color: white;
+}
+
+.image-preview {
+  position: relative;
+  width: 100%;
+  max-width: 300px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+}
+
+.image-preview img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  display: block;
+}
+
+.remove-image-btn {
+  position: absolute;
+  top: var(--space-8);
+  right: var(--space-8);
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
+  background: rgba(var(--color-error-rgb), 0.9);
+  color: white;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-standard);
+}
+
+.remove-image-btn:hover {
+  background: var(--color-error);
+  transform: scale(1.1);
+}
