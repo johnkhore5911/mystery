@@ -1,280 +1,309 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { ShoppingCart, Search, ChefHat, Clock, Leaf, Star, TrendingUp } from 'lucide-react';
-import '../assets/styles/HomePage.css';
+import React, { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { 
+  Search, 
+  ShoppingCart, 
+  Plus, 
+  Minus, 
+  Clock, 
+  Star, 
+  TrendingUp, 
+  ChefHat,
+  Award,
+  Flame
+} from 'lucide-react';
+import { menuData } from '../data/menuData';
 import { useCart } from '../hooks/useCart';
-import toast, { Toaster } from 'react-hot-toast';
-import { menuAPI } from '../api/menuAPI';
+import '../assets/styles/HomePage.css';
 
 const HomePage = () => {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const tableNumber = searchParams.get('table') || 'Unknown';
-  
-  const [selectedCategory, setSelectedCategory] = useState('all');
+  const { cart, addToCart: addItemToCart, updateQuantity, getCartCount } = useCart();
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('all');
   const [isScrolled, setIsScrolled] = useState(false);
-  
-  const [categories, setCategories] = useState([]);
-  const [menuItems, setMenuItems] = useState([]); // ✅ NEW - Add this state
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [showCartPulse, setShowCartPulse] = useState(false);
 
-  // Use Cart Context
-  const { cart, addToCart, getCartCount, getCartTotal } = useCart();
+  // Get table number from URL or local storage
+  const tableNumber = new URLSearchParams(window.location.search).get('table') || '12';
 
-  // ✅ UPDATED - Fetch both categories and menu items
-  useEffect(() => {
-    const fetchMenuData = async () => {
-      try {
-        setLoading(true);
-        
-        // Fetch categories and menu items in parallel
-        const [categoriesResponse, itemsResponse] = await Promise.all([
-          menuAPI.getAllCategories(),
-          menuAPI.getAllMenuItems()
-        ]);
-        const data = menuAPI.getAllCategories();
-        console.log("data: ",data);
+  // FIXED: Use useMemo to calculate items with stats ONCE and cache them
+  // This prevents random values from changing on every render
+  const itemsWithStats = useMemo(() => {
+    // Flatten all items with category info
+    const allItems = menuData.categories.flatMap(category => 
+      category.items.map(item => ({
+        ...item,
+        categoryId: category.id,
+        categoryName: category.name
+      }))
+    );
 
-        if (categoriesResponse.success) {
-          setCategories(categoriesResponse.data);
-        } else {
-          toast.error('Failed to load categories');
-        }
+    // Add rating and order count to items (simulated) - ONLY RUNS ONCE
+    return allItems.map(item => ({
+      ...item,
+      rating: item.isPopular ? (4.5 + Math.random() * 0.4).toFixed(1) : (4.0 + Math.random() * 0.5).toFixed(1),
+      orderCount: item.isPopular ? Math.floor(100 + Math.random() * 150) : Math.floor(30 + Math.random() * 90)
+    }));
+  }, []); // Empty dependency array means this only runs once when component mounts
 
-        if (itemsResponse.success) {
-          setMenuItems(itemsResponse.data);
-        } else {
-          toast.error('Failed to load menu items');
-        }
-
-      } catch (err) {
-        console.error('Error:', err);
-        toast.error('Error loading menu');
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchMenuData();
-  }, []);
-
-  // Detect scroll to shrink header
+  // Scroll handler
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
+      setIsScrolled(window.scrollY > 20);
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // ✅ NEW - Process menu items with their category names
-  const allItems = menuItems.map(item => {
-    // Find the category for this item
-    const categoryObj = categories.find(cat => cat._id === item.category);
-    return {
-      ...item,
-      categoryName: categoryObj?.name || 'Unknown'
-    };
+  // Filter items
+  const filteredItems = itemsWithStats.filter(item => {
+    const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         item.description.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory = selectedCategory === 'all' || 
+                           (selectedCategory === 'popular' ? item.isPopular : item.categoryId === selectedCategory);
+    return matchesSearch && matchesCategory;
   });
 
-  // ✅ UPDATED - Filter items based on category and search
-  const filteredItems = allItems.filter(item => {
-    const matchesCategory = selectedCategory === 'all' || item.category === selectedCategory;
-    const matchesSearch = 
-      item.name?.toLowerCase().includes(searchQuery.toLowerCase()) || 
-      item.description?.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
+  // Sort by popularity for better engagement
+  const sortedItems = [...filteredItems].sort((a, b) => {
+    if (selectedCategory === 'popular' || selectedCategory === 'all') {
+      return (b.orderCount || 0) - (a.orderCount || 0);
+    }
+    return 0;
   });
 
-  // Handle adding items to cart
-  const handleAddToCart = (item) => {
-    addToCart(item);
-    toast.success(`${item.name} added to cart!`);
+  // Get cart item quantity
+  const getCartItemCount = (itemId) => {
+    const cartItem = cart.find(item => item.id === itemId);
+    return cartItem ? cartItem.quantity : 0;
   };
 
-  // Get cart values
-  const cartCount = getCartCount();
-  const cartTotal = getCartTotal();
+  // Add to cart handler
+  const handleAddToCart = (item) => {
+    addItemToCart(item);
+    setShowCartPulse(true);
+    setTimeout(() => setShowCartPulse(false), 600);
+  };
 
-  // Loading state
-  if (loading) {
-    return (
-      <div className="loading-container">
-        <div className="spinner"></div>
-        <p>Loading menu...</p>
-      </div>
-    );
-  }
+  // Remove from cart handler
+  const handleRemoveFromCart = (itemId) => {
+    const currentQuantity = getCartItemCount(itemId);
+    if (currentQuantity > 0) {
+      updateQuantity(itemId, currentQuantity - 1);
+    }
+  };
 
-  // Error state
-  if (error) {
-    return (
-      <div className="error-container">
-        <p>Error loading menu. Please try again.</p>
-      </div>
-    );
-  }
+  const getTotalItems = () => {
+    return getCartCount();
+  };
 
+  const getTotalAmount = () => {
+    return cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  };
+
+  const handleViewCart = () => {
+    navigate('/cart', { 
+      state: { 
+        restaurantName: menuData.restaurantInfo.name,
+        tableNumber 
+      } 
+    });
+  };
 
   return (
     <div className="home-page">
-      <Toaster position="top-center" />
-
-      {/* Smart Compact Header */}
-      <header className={`header ${isScrolled ? 'scrolled' : ''}`}>
+      {/* Sticky Header */}
+      <header className={`main-header ${isScrolled ? 'scrolled' : ''}`}>
         <div className="header-top">
-          <div className="restaurant-info">
-            <ChefHat className="logo-icon" />
-            <div className="restaurant-details">
-              <h1 className="restaurant-name">Mystery Dine-In</h1>
-              {!isScrolled && <p className="tagline">Delicious food at your table</p>}
+          <div className="restaurant-branding">
+            <div className="logo-wrapper">
+              <ChefHat className="logo-icon" />
+            </div>
+            <div className="brand-info">
+              <h1 className="restaurant-name">{menuData.restaurantInfo.name}</h1>
+              <p className="table-badge">
+                <span className="table-icon">🪑</span> Table {tableNumber}
+              </p>
             </div>
           </div>
-          <div className="table-badge">
-            <span className="table-icon">🪑</span>
-            Table {tableNumber}
-          </div>
+
+          {getTotalItems() > 0 && (
+            <button className={`cart-btn ${showCartPulse ? 'pulse' : ''}`} onClick={handleViewCart}>
+              <ShoppingCart size={20} />
+              <span className="cart-text">Cart</span>
+              <span className="cart-count">{getTotalItems()}</span>
+            </button>
+          )}
         </div>
 
         {/* Search Bar */}
-        {!isScrolled && (
-          <div className="search-bar">
-            <Search className="search-icon" />
-            <input
-              type="text"
-              className="search-input"
-              placeholder="Search your cravings..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-        )}
+        <div className="search-container">
+          <Search className="search-icon" size={18} />
+          <input
+            type="text"
+            className="search-input"
+            placeholder="Search for dishes..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
 
-        {/* Category Scroll */}
-        <div className="category-scroll">
+        {/* Category Pills */}
+        <div className="category-tabs">
           <button
-            className={`category-chip ${selectedCategory === 'all' ? 'active' : ''}`}
+            className={`category-tab ${selectedCategory === 'all' ? 'active' : ''}`}
             onClick={() => setSelectedCategory('all')}
           >
-            <span className="category-icon">🍽️</span>
-            All
+            <span className="tab-icon">🍽️</span>
+            <span className="tab-text">All Items</span>
           </button>
-          {/* {menuData.categories.map((category) => ( */}
-{categories.map(cat => (
-  <button
-    key={cat._id}
-    className={`category-btn ${selectedCategory === cat.name ? 'active' : ''}`}
-    onClick={() => setSelectedCategory(cat.name)}
-  >
-    {cat.icon} {cat.name}
-              {/* <span className="category-icon">{category.icon}</span> */}
-              {/* {category.name} */}
+          <button
+            className={`category-tab ${selectedCategory === 'popular' ? 'active' : ''}`}
+            onClick={() => setSelectedCategory('popular')}
+          >
+            <span className="tab-icon">🔥</span>
+            <span className="tab-text">Popular</span>
+          </button>
+          {menuData.categories.map(category => (
+            <button
+              key={category.id}
+              className={`category-tab ${selectedCategory === category.id ? 'active' : ''}`}
+              onClick={() => setSelectedCategory(category.id)}
+            >
+              <span className="tab-icon">{category.icon}</span>
+              <span className="tab-text">{category.name}</span>
             </button>
           ))}
         </div>
       </header>
 
-      {/* Menu Items Grid */}
-      <div className="menu-container">
-        <div className="items-grid">
-          {filteredItems.length === 0 ? (
-            <div className="empty-state">
-              <ChefHat size={48} />
-              <p>No items found matching your search.</p>
-            </div>
-          ) : (
-            filteredItems.map((item) => (
-              <div key={item.id} className="menu-card">
-                {/* Food Image - Larger & More Appealing */}
-                <div className="card-image-wrapper">
-                  <img 
-                    src={item.image} 
-                    alt={item.name} 
-                    className="card-image"
-                    loading="lazy"
-                  />
-                  
-                  {/* Badges */}
-                  <div className="badges-wrapper">
-                    {item.isVeg && (
-                      <div className="veg-badge">
-                        <Leaf size={12} />
-                      </div>
-                    )}
-                    {item.isPopular && (
-                      <div className="popular-badge">
-                        <Star size={12} fill="white" />
-                        <span>Popular</span>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Quick Add Overlay on Tap */}
-                  <div className="quick-add-overlay">
-                    <button
-                      className="quick-add-btn"
-                      onClick={() => handleAddToCart(item)}
-                    >
-                      <ShoppingCart size={18} />
-                      Quick Add
-                    </button>
-                  </div>
-                </div>
-
-                {/* Card Content */}
-                <div className="card-content">
-                  <div className="item-header">
-                    <h3 className="item-name">{item.name}</h3>
-                    {item.prepTime && (
-                      <span className="prep-time">
-                        <Clock size={12} />
-                        {item.prepTime}
-                      </span>
-                    )}
-                  </div>
-                  
-                  <p className="item-description">{item.description}</p>
-                  
-                  {/* Price & Add Button */}
-                  <div className="item-footer">
-                    <div className="price-wrapper">
-                      <span className="currency">₹</span>
-                      <span className="item-price">{item.price}</span>
-                    </div>
-                    <button
-                      className="add-btn"
-                      onClick={() => handleAddToCart(item)}
-                    >
-                      <ShoppingCart size={14} />
-                      Add
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))
-          )}
+      {/* Main Content */}
+      <main className="menu-content">
+        {/* Results Header with Engagement Hook */}
+        <div className="results-info">
+          <h2 className="section-title">
+            {selectedCategory === 'popular' && <Flame className="title-icon" />}
+            {selectedCategory === 'all' ? 'Our Menu' : 
+             selectedCategory === 'popular' ? 'Popular Dishes' :
+             menuData.categories.find(c => c.id === selectedCategory)?.name}
+          </h2>
+          <span className="results-count">{sortedItems.length} dishes</span>
         </div>
-      </div>
 
-      {/* Floating Cart Button - Enhanced */}
-      {cartCount > 0 && (
-        <button
-          className="floating-cart-btn"
-          onClick={() => navigate(`/cart?table=${tableNumber}`)}
-        >
-          <div className="cart-icon-wrapper">
-            <ShoppingCart size={24} />
-            <span className="cart-count">{cartCount}</span>
+        {/* Menu Cards - Mobile Optimized */}
+        {sortedItems.length > 0 ? (
+          <div className="menu-list">
+            {sortedItems.map((item) => {
+              const itemCount = getCartItemCount(item.id);
+              return (
+                <div key={item.id} className="menu-item-card">
+                  {/* Image Section */}
+                  <div className="item-image-section">
+                    <img src={item.image} alt={item.name} className="item-image" />
+                    
+                    {/* Badges */}
+                    <div className="item-badges">
+                      {item.isPopular && (
+                        <span className="badge popular-badge">
+                          <TrendingUp size={12} /> Popular
+                        </span>
+                      )}
+                      {item.isVeg && (
+                        <span className="badge veg-badge">
+                          🌱 Veg
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Rating Badge */}
+                    {item.rating && (
+                      <div className="rating-badge">
+                        <Star size={12} fill="currentColor" />
+                        <span>{item.rating}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Content Section */}
+                  <div className="item-content">
+                    <div className="item-header">
+                      <h3 className="item-name">{item.name}</h3>
+                      {item.orderCount > 100 && (
+                        <span className="order-count">
+                          <Award size={14} />
+                          {item.orderCount}+ orders
+                        </span>
+                      )}
+                    </div>
+
+                    <p className="item-description">{item.description}</p>
+
+                    {/* Footer with Price & Actions */}
+                    <div className="item-footer">
+                      <div className="price-section">
+                        <span className="item-price">₹{item.price}</span>
+                        <span className="prep-time">
+                          <Clock size={14} />
+                          {item.prepTime}
+                        </span>
+                      </div>
+
+                      {/* Add to Cart Control */}
+                      {itemCount === 0 ? (
+                        <button 
+                          className="add-to-cart-btn"
+                          onClick={() => handleAddToCart(item)}
+                        >
+                          <Plus size={18} />
+                          <span>Add</span>
+                        </button>
+                      ) : (
+                        <div className="quantity-control">
+                          <button 
+                            className="quantity-btn decrease"
+                            onClick={() => handleRemoveFromCart(item.id)}
+                          >
+                            <Minus size={16} />
+                          </button>
+                          <span className="quantity-display">{itemCount}</span>
+                          <button 
+                            className="quantity-btn increase"
+                            onClick={() => handleAddToCart(item)}
+                          >
+                            <Plus size={16} />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
-          <div className="cart-details">
-            <span className="cart-label">{cartCount} item{cartCount > 1 ? 's' : ''}</span>
-            <span className="cart-total">₹{cartTotal.toFixed(0)}</span>
+        ) : (
+          <div className="empty-state">
+            <div className="empty-icon">🔍</div>
+            <h3>No dishes found</h3>
+            <p>Try searching with different keywords</p>
           </div>
-          <span className="view-cart-arrow">→</span>
-        </button>
+        )}
+      </main>
+
+      {/* Floating Cart Button (appears when items in cart) */}
+      {getTotalItems() > 0 && (
+        <div className="floating-cart-bar">
+          <div className="cart-summary">
+            <div className="cart-details">
+              <span className="cart-items-count">{getTotalItems()} Item{getTotalItems() > 1 ? 's' : ''}</span>
+              <span className="cart-total">₹{getTotalAmount()}</span>
+            </div>
+          </div>
+          <button className="view-cart-btn" onClick={handleViewCart}>
+            View Cart
+            <ShoppingCart size={20} />
+          </button>
+        </div>
       )}
     </div>
   );

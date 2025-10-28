@@ -140,16 +140,6 @@ export const menuData = {
           prepTime: '8 mins'
         },
         {
-          id: 'des-3',
-          name: 'Chocolate Mousse',
-          description: 'Rich chocolate mousse with hazelnuts and cream',
-          price: 159,
-          image: 'https://images.unsplash.com/photo-1541636890-a1fa994dc8f8?w=400',
-          isVeg: true,
-          isPopular: true,
-          prepTime: '10 mins'
-        },
-        {
           id: 'des-4',
           name: 'Ice Cream Sundae',
           description: 'Three scoops with toppings and chocolate sauce',
@@ -205,16 +195,6 @@ export const menuData = {
           isVeg: true,
           isPopular: true,
           prepTime: '4 mins'
-        },
-        {
-          id: 'bev-5',
-          name: 'Masala Chai',
-          description: 'Traditional Indian tea with aromatic spices',
-          price: 49,
-          image: 'https://images.unsplash.com/photo-1597318130721-f48c0201db81?w=400',
-          isVeg: true,
-          isPopular: false,
-          prepTime: '5 mins'
         }
       ]
     }
