@@ -7,13 +7,22 @@ import toast, { Toaster } from 'react-hot-toast';
 import '../assets/styles/CartPage.css';
 import { paymentAPI } from '../api/paymentAPI';
 import { orderAPI } from '../api/orderAPI';
+import { useLocation } from 'react-router-dom';
 
 const CartPage = () => {
   const navigate = useNavigate();
   const restaurantName = 'Mystery Dine-In';
   const [searchParams] = useSearchParams();
-  const tableNumber = searchParams.get('table') || 'Unknown';
-  
+  console.log("searchParams: ",searchParams);
+  // const tableNumber = searchParams.get('table') || 'Unknown';
+  const location = useLocation();
+    // Updated extraction: Check state first, then search params, then default
+  const tableNumber = location.state?.tableNumber || 
+                      searchParams.get('table') || 
+                      '12';  // Use '12' as default instead of 'Unknown'
+
+  console.log('Table Number from state/search: ', tableNumber);  // Add this for debugging
+
   const { cart, updateQuantity, removeFromCart, getCartTotal, clearCart } = useCart();
   const [isProcessing, setIsProcessing] = useState(false);
 

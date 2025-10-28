@@ -137,6 +137,7 @@ const HomePage = () => {
     //     tableNumber 
     //   } 
     // });
+    console.log("Table Number: ",tableNumber)
     navigate('/cart', { state: { restaurantName: restaurantInfo.name, tableNumber } });
   };
 
