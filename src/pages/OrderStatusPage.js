@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { CheckCircle, Clock, ChefHat, Home, Receipt, Leaf, Download } from 'lucide-react';
-import { menuData } from '../data/menuData';
+// import { menuData } from '../data/menuData';
 import html2canvas from 'html2canvas';
 import toast, { Toaster } from 'react-hot-toast';
 import '../assets/styles/OrderStatusPage.css';
@@ -11,6 +11,12 @@ const OrderStatusPage = () => {
   const [searchParams] = useSearchParams();
   const orderId = searchParams.get('orderId');
   const tableNumber = searchParams.get('table');
+  const restaurantInfo = { // Add this object
+    name: 'Mystery Dine-In',
+    tagline: 'An unforgettable culinary experience.',
+    phone: '+91 98765 43210',
+    email: 'contact@mysterydine.com'
+  };
   
   const [orderData, setOrderData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -272,10 +278,10 @@ const OrderStatusPage = () => {
 
         {/* Restaurant Info */}
         <div className="restaurant-info-footer">
-          <h3>{menuData.restaurantInfo.name}</h3>
-          <p>{menuData.restaurantInfo.tagline}</p>
+          <h3>{restaurantInfo.name}</h3>
+          <p>{restaurantInfo.tagline}</p>
           <p className="contact-info">
-            {menuData.restaurantInfo.phone} • {menuData.restaurantInfo.email}
+            {restaurantInfo.phone} • {restaurantInfo.email}
           </p>
           <p className="timestamp-footer">
             Generated on {orderDate} at {orderTime}

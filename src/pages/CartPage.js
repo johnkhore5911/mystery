@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ShoppingBag, Trash2, Plus, Minus, ArrowLeft, CreditCard, Leaf, Receipt, TrendingUp } from 'lucide-react';
 import { useCart } from '../hooks/useCart';
-import { menuData } from '../data/menuData';
+// import { menuData } from '../data/menuData';
 import toast, { Toaster } from 'react-hot-toast';
 import '../assets/styles/CartPage.css';
 import { paymentAPI } from '../api/paymentAPI';
@@ -10,6 +10,7 @@ import { orderAPI } from '../api/orderAPI';
 
 const CartPage = () => {
   const navigate = useNavigate();
+  const restaurantName = 'Mystery Dine-In';
   const [searchParams] = useSearchParams();
   const tableNumber = searchParams.get('table') || 'Unknown';
   
@@ -48,7 +49,7 @@ const CartPage = () => {
           amount: orderResponse.order.amount,
           currency: orderResponse.order.currency,
           order_id: orderResponse.order.id,
-          name: menuData.restaurantInfo.name,
+          name: restaurantName,
           description: `Table ${tableNumber} - Order Payment`,
           handler: async function (response) {
             try {

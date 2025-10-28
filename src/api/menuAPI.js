@@ -1,74 +1,43 @@
-import { apiRequest } from './config';
+import axios from 'axios';
 
-export const menuAPI = {
-  // PUBLIC ROUTES
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
-  // Get all categories with items
-  getAllCategories: async () => {
-    return await apiRequest('/menu/categories', {
-      method: 'GET',
-    });
-  },
+// This function is for the customer-facing menu
+export const getMenuData = async () => {
+  try {
+    const response = await axios.get(`${API_URL}/menu/categories`);
+    if (response.data && response.data.success) {
+      return response.data.categories;
+    }
+    return [];
+  } catch (error) {
+    console.error('Error fetching menu data:', error);
+    return [];
+  }
+};
 
-  // Get all menu items
-  getAllMenuItems: async () => {
-    return await apiRequest('/menu/items', {
-      method: 'GET',
-    });
-  },
+// --- Functions for the Admin Panel ---
 
-  // Get single menu item
-  getMenuItem: async (id) => {
-    return await apiRequest(`/menu/items/${id}`, {
-      method: 'GET',
-    });
-  },
+export const createCategory = async (data) => {
+  // Logic to post to /api/menu/categories
+};
 
-  // ADMIN PROTECTED ROUTES
+export const updateCategory = async (id, data) => {
+  // Logic to put to /api/menu/categories/:id
+};
 
-  // Create category
-  createCategory: async (data) => {
-    return await apiRequest('/menu/categories', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    });
-  },
+export const deleteCategory = async (id) => {
+  // Logic to delete /api/menu/categories/:id
+};
 
-  // Update category
-  updateCategory: async (id, data) => {
-    return await apiRequest(`/menu/categories/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(data),
-    });
-  },
+export const createMenuItem = async (data) => {
+  // Logic to post to /api/menu/items
+};
 
-  // Delete category
-  deleteCategory: async (id) => {
-    return await apiRequest(`/menu/categories/${id}`, {
-      method: 'DELETE',
-    });
-  },
+export const updateMenuItem = async (id, data) => {
+  // Logic to put to /api/menu/items/:id
+};
 
-  // Create menu item
-  createMenuItem: async (data) => {
-    return await apiRequest('/menu/items', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    });
-  },
-
-  // Update menu item
-  updateMenuItem: async (id, data) => {
-    return await apiRequest(`/menu/items/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(data),
-    });
-  },
-
-  // Delete menu item
-  deleteMenuItem: async (id) => {
-    return await apiRequest(`/menu/items/${id}`, {
-      method: 'DELETE',
-    });
-  },
+export const deleteMenuItem = async (id) => {
+  // Logic to delete /api/menu/items/:id
 };

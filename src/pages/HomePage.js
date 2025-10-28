@@ -12,9 +12,16 @@ import {
   Award,
   Flame
 } from 'lucide-react';
-import { menuData } from '../data/menuData';
+// import { menuData } from '../data/menuData';
+// import { getMenuData } from '../data/menuData';
+import { getMenuData } from '../api/menuAPI';  
 import { useCart } from '../hooks/useCart';
 import '../assets/styles/HomePage.css';
+
+// At the top of your HomePage component
+const restaurantInfo = {
+    name: 'Mystery Dine-In'
+};
 
 const HomePage = () => {
   const navigate = useNavigate();
@@ -23,6 +30,27 @@ const HomePage = () => {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [isScrolled, setIsScrolled] = useState(false);
   const [showCartPulse, setShowCartPulse] = useState(false);
+  const [menuCategories, setMenuCategories] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  // getMenuData();
+
+  useEffect(() => {
+    const fetchMenu = async () => {
+      setIsLoading(true);
+      console.log("API calling!!! fetch menu data!!")
+      const data = await getMenuData();
+      console.log("data: ",data);
+      setMenuCategories(data);
+      setIsLoading(false);
+    };
+
+    fetchMenu();
+    // getMenuData();
+
+  }, []);
+
+
+
 
   // Get table number from URL or local storage
   const tableNumber = new URLSearchParams(window.location.search).get('table') || '12';
@@ -31,7 +59,7 @@ const HomePage = () => {
   // This prevents random values from changing on every render
   const itemsWithStats = useMemo(() => {
     // Flatten all items with category info
-    const allItems = menuData.categories.flatMap(category => 
+    const allItems = menuCategories.flatMap(category => 
       category.items.map(item => ({
         ...item,
         categoryId: category.id,
@@ -45,7 +73,7 @@ const HomePage = () => {
       rating: item.isPopular ? (4.5 + Math.random() * 0.4).toFixed(1) : (4.0 + Math.random() * 0.5).toFixed(1),
       orderCount: item.isPopular ? Math.floor(100 + Math.random() * 150) : Math.floor(30 + Math.random() * 90)
     }));
-  }, []); // Empty dependency array means this only runs once when component mounts
+  }, [menuCategories]); // Empty dependency array means this only runs once when component mounts
 
   // Scroll handler
   useEffect(() => {
@@ -103,13 +131,18 @@ const HomePage = () => {
   };
 
   const handleViewCart = () => {
-    navigate('/cart', { 
-      state: { 
-        restaurantName: menuData.restaurantInfo.name,
-        tableNumber 
-      } 
-    });
+    // navigate('/cart', { 
+    //   state: { 
+    //     restaurantName: menuData.restaurantInfo.name,
+    //     tableNumber 
+    //   } 
+    // });
+    navigate('/cart', { state: { restaurantName: restaurantInfo.name, tableNumber } });
   };
+
+  if (isLoading) {
+    return <div>Loading menu...</div>; // Or a spinner component
+  }
 
   return (
     <div className="home-page">
@@ -121,7 +154,9 @@ const HomePage = () => {
               <ChefHat className="logo-icon" />
             </div>
             <div className="brand-info">
-              <h1 className="restaurant-name">{menuData.restaurantInfo.name}</h1>
+              <h1 className="restaurant-name">{restaurantInfo.name}</h1>
+
+              {/* <h1 className="restaurant-name">{menuData.restaurantInfo.name}</h1> */}
               <p className="table-badge">
                 <span className="table-icon">🪑</span> Table {tableNumber}
               </p>
@@ -165,7 +200,7 @@ const HomePage = () => {
             <span className="tab-icon">🔥</span>
             <span className="tab-text">Popular</span>
           </button>
-          {menuData.categories.map(category => (
+          {menuCategories.map(category => (
             <button
               key={category.id}
               className={`category-tab ${selectedCategory === category.id ? 'active' : ''}`}
@@ -186,7 +221,7 @@ const HomePage = () => {
             {selectedCategory === 'popular' && <Flame className="title-icon" />}
             {selectedCategory === 'all' ? 'Our Menu' : 
              selectedCategory === 'popular' ? 'Popular Dishes' :
-             menuData.categories.find(c => c.id === selectedCategory)?.name}
+             menuCategories.find(c => c.id === selectedCategory)?.name}
           </h2>
           <span className="results-count">{sortedItems.length} dishes</span>
         </div>

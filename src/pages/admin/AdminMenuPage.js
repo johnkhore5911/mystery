@@ -1224,8 +1224,8 @@ import {
 import toast, { Toaster } from 'react-hot-toast';
 import '../../assets/styles/AdminMenuPage.css';
 import AdminNavbar from '../../components/AdminNavbar';
-import { menuAPI } from '../../api/menuAPI'; // ✅ Import API
-
+// import { menuAPI } from '../../api/menuAPI'; // ✅ Import API
+import * as menuAPI from '../../api/menuAPI';
 const AdminMenuPage = () => {
   const [menuData, setMenuData] = useState(null);
   const [showItemModal, setShowItemModal] = useState(false);
@@ -1271,68 +1271,103 @@ const AdminMenuPage = () => {
   }, []);
 
   // ✅ CHANGED: Load from DATABASE instead of localStorage
-  const loadMenu = async () => {
-    try {
-      const response = await menuAPI.getAllCategories();
+  // const loadMenu = async () => {
+  //   try {
+  //     // const response = await menuAPI.getAllCategories();
+  //     const data = await menuAPI.getMenuData();
       
-      if (response.success && response.categories && response.categories.length > 0) {
-        // ✅ Transform database response to match your UI format
-        const transformedData = {
-          categories: response.categories.map(cat => ({
-            id: cat._id || cat.id,
-            name: cat.name,
-            icon: cat.icon,
-            items: (cat.items || []).map(item => ({
-              id: item._id || item.id,
-              name: item.name,
-              description: item.description,
-              price: item.price,
-              image: item.image,
-              isVeg: item.isVeg,
-              isPopular: item.isPopular,
-              prepTime: item.prepTime
-            }))
-          }))
-        };
-        setMenuData(transformedData);
-      } else {
-        // ✅ Initialize with default data and save to database
-        const defaultMenu = {
-          categories: [
-            { id: 'appetizers', name: 'Appetizers', icon: '🥟', items: [] },
-            { id: 'main-course', name: 'Main Course', icon: '🍛', items: [] },
-            { id: 'desserts', name: 'Desserts', icon: '🍰', items: [] },
-            { id: 'beverages', name: 'Beverages', icon: '☕', items: [] }
-          ]
-        };
+  //     if (response.success && response.categories && response.categories.length > 0) {
+  //       // ✅ Transform database response to match your UI format
+  //       const transformedData = {
+  //         categories: response.categories.map(cat => ({
+  //           id: cat._id || cat.id,
+  //           name: cat.name,
+  //           icon: cat.icon,
+  //           items: (cat.items || []).map(item => ({
+  //             id: item._id || item.id,
+  //             name: item.name,
+  //             description: item.description,
+  //             price: item.price,
+  //             image: item.image,
+  //             isVeg: item.isVeg,
+  //             isPopular: item.isPopular,
+  //             prepTime: item.prepTime
+  //           }))
+  //         }))
+  //       };
+  //       setMenuData(transformedData);
+  //     } else {
+  //       // ✅ Initialize with default data and save to database
+  //       const defaultMenu = {
+  //         categories: [
+  //           { id: 'appetizers', name: 'Appetizers', icon: '🥟', items: [] },
+  //           { id: 'main-course', name: 'Main Course', icon: '🍛', items: [] },
+  //           { id: 'desserts', name: 'Desserts', icon: '🍰', items: [] },
+  //           { id: 'beverages', name: 'Beverages', icon: '☕', items: [] }
+  //         ]
+  //       };
         
-        // ✅ Create default categories in database
-        try {
-          for (let i = 0; i < defaultMenu.categories.length; i++) {
-            const cat = defaultMenu.categories[i];
-            await menuAPI.createCategory({ name: cat.name, icon: cat.icon, order: i });
-          }
-          // Reload after creating
-          setTimeout(() => loadMenu(), 500);
-        } catch (err) {
-          // If creation fails, just use local data
-          setMenuData(defaultMenu);
-        }
-      }
-    } catch (error) {
-      console.error('Load menu error:', error);
-      // ✅ Fallback: Use default data if API fails
-      const defaultMenu = {
-        categories: [
-          { id: 'appetizers', name: 'Appetizers', icon: '🥟', items: [] },
-          { id: 'main-course', name: 'Main Course', icon: '🍛', items: [] },
-          { id: 'desserts', name: 'Desserts', icon: '🍰', items: [] },
-          { id: 'beverages', name: 'Beverages', icon: '☕', items: [] }
-        ]
+  //       // ✅ Create default categories in database
+  //       try {
+  //         for (let i = 0; i < defaultMenu.categories.length; i++) {
+  //           const cat = defaultMenu.categories[i];
+  //           await menuAPI.createCategory({ name: cat.name, icon: cat.icon, order: i });
+  //         }
+  //         // Reload after creating
+  //         setTimeout(() => loadMenu(), 500);
+  //       } catch (err) {
+  //         // If creation fails, just use local data
+  //         setMenuData(defaultMenu);
+  //       }
+  //     }
+  //   } catch (error) {
+  //     console.error('Load menu error:', error);
+  //     // ✅ Fallback: Use default data if API fails
+  //     const defaultMenu = {
+  //       categories: [
+  //         { id: 'appetizers', name: 'Appetizers', icon: '🥟', items: [] },
+  //         { id: 'main-course', name: 'Main Course', icon: '🍛', items: [] },
+  //         { id: 'desserts', name: 'Desserts', icon: '🍰', items: [] },
+  //         { id: 'beverages', name: 'Beverages', icon: '☕', items: [] }
+  //       ]
+  //     };
+  //     setMenuData(defaultMenu);
+  //   }
+  // };
+  // Inside your AdminMenuPage.js component
+
+const loadMenu = async () => {
+  try {
+    // Correctly call getMenuData instead of getAllCategories
+    const categories = await menuAPI.getMenuData();
+
+    if (categories && categories.length > 0) {
+      // The response from getMenuData is already the array of categories,
+      // so we can use it directly.
+      const transformedData = {
+        categories: categories.map(cat => ({
+          ...cat,
+          items: cat.items || [] // Ensure items is always an array
+        }))
       };
-      setMenuData(defaultMenu);
+      setMenuData(transformedData);
+    } else {
+      // Handle case where no categories are returned from the API
+      setMenuData({ categories: [] });
     }
-  };
+  } catch (error) {
+    console.error("Load menu error:", error);
+    toast.error("Failed to load menu from the server.");
+    // Fallback to empty data structure to prevent crashes
+    setMenuData({ categories: [] });
+  }
+};
+
+// Make sure this is called in your useEffect
+useEffect(() => {
+  loadMenu();
+}, []);
+
 
   // ✅ REMOVED: saveMenu function (now we use API calls directly)
 
