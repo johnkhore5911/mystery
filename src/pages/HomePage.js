@@ -48,7 +48,34 @@ const HomePage = () => {
     // getMenuData();
 
   }, []);
-
+  
+    // Scroll handler - hide header on scroll down (mobile only)
+  useEffect(() => {
+    let lastScrollY = window.scrollY;
+    
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      
+      // Only apply hide behavior on mobile (screens smaller than 768px)
+      if (window.innerWidth < 768) {
+        if (currentScrollY > lastScrollY && currentScrollY > 100) {
+          // Scrolling down - hide header elements
+          setIsScrolled(true);
+        } else {
+          // Scrolling up - show header elements
+          setIsScrolled(false);
+        }
+      } else {
+        // Desktop - just track scroll position
+        setIsScrolled(currentScrollY > 20);
+      }
+      
+      lastScrollY = currentScrollY;
+    };
+    
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
 
 
@@ -141,9 +168,13 @@ const HomePage = () => {
     navigate('/cart', { state: { restaurantName: restaurantInfo.name, tableNumber } });
   };
 
+  
+
   if (isLoading) {
     return <div>Loading menu...</div>; // Or a spinner component
   }
+
+  
 
   return (
     <div className="home-page">
@@ -247,7 +278,7 @@ const HomePage = () => {
                       )}
                       {item.isVeg && (
                         <span className="badge veg-badge">
-                          🌱 Veg
+                           Veg
                         </span>
                       )}
                     </div>
