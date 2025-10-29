@@ -49,33 +49,28 @@ const HomePage = () => {
 
   }, []);
   
-    // Scroll handler - hide header on scroll down (mobile only)
-  useEffect(() => {
-    let lastScrollY = window.scrollY;
-    
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      
-      // Only apply hide behavior on mobile (screens smaller than 768px)
-      if (window.innerWidth < 768) {
-        if (currentScrollY > lastScrollY && currentScrollY > 100) {
-          // Scrolling down - hide header elements
-          setIsScrolled(true);
-        } else {
-          // Scrolling up - show header elements
-          setIsScrolled(false);
-        }
-      } else {
-        // Desktop - just track scroll position
-        setIsScrolled(currentScrollY > 20);
-      }
-      
-      lastScrollY = currentScrollY;
-    };
-    
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+
+useEffect(() => {
+  let lastScrollY = window.scrollY;
+
+  const handleScroll = () => {
+    const currentScrollY = window.scrollY;
+
+    // Hide header when scrolling down
+    if (currentScrollY > lastScrollY && currentScrollY > 100) {
+      setIsScrolled(true);
+    } 
+    // Show when scrolling up
+    else if (currentScrollY < lastScrollY) {
+      setIsScrolled(false);
+    }
+
+    lastScrollY = currentScrollY;
+  };
+
+  window.addEventListener('scroll', handleScroll);
+  return () => window.removeEventListener('scroll', handleScroll);
+}, []);
 
 
 
