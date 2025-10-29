@@ -5,16 +5,16 @@
     //   name: 'Appetizers',
     //   icon: '🥟',
     //   items: [
-    //     {
-    //       id: 'app-1',
-    //       name: 'Crispy Spring Rolls',
-    //       description: 'Golden fried rolls with vegetables and sweet chili sauce',
-    //       price: 149,
-    //       image: 'https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=400',
-    //       isVeg: true,
-    //       isPopular: true,
-    //       prepTime: '10 mins'
-    //     },
+        // {
+        //   id: 'app-1',
+        //   name: 'Crispy Spring Rolls',
+        //   description: 'Golden fried rolls with vegetables and sweet chili sauce',
+        //   price: 149,
+        //   image: 'https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=400',
+        //   isVeg: true,
+        //   isPopular: true,
+        //   prepTime: '10 mins'
+        // },
 //         {
 //           id: 'app-2',
 //           name: 'Stuffed Mushrooms',

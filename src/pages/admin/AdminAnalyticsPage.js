@@ -38,98 +38,123 @@ const AdminAnalyticsPage = () => {
     fetchAnalytics();
   }, [timeRange]);
 
+  // const fetchAnalytics = async () => {
+  //   try {
+  //     const [dashboardStats, revenueData, popularItems] = await Promise.all([
+  //       analyticsAPI.getDashboardStats(),
+  //       analyticsAPI.getRevenueData(30),
+  //       analyticsAPI.getPopularItems(10)
+  //     ]);
+
+  //     setStats({
+  //       ...dashboardStats.stats,
+  //       revenueData: revenueData.data,
+  //       popularItems: popularItems.items
+  //     });
+  //   } catch (error) {
+  //     toast.error('Failed to load analytics');
+  //     console.error(error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
   const fetchAnalytics = async () => {
-    try {
-      const [dashboardStats, revenueData, popularItems] = await Promise.all([
-        analyticsAPI.getDashboardStats(),
-        analyticsAPI.getRevenueData(30),
-        analyticsAPI.getPopularItems(10)
-      ]);
-
-      setStats({
-        ...dashboardStats.stats,
-        revenueData: revenueData.data,
-        popularItems: popularItems.items
-      });
-    } catch (error) {
-      toast.error('Failed to load analytics');
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const calculateStats = () => {
-    const orders = JSON.parse(sessionStorage.getItem('orders') || '[]');
-    
-    // Generate dummy data if no orders
-    if (orders.length === 0) {
-      setStats(getDummyStats());
-      return;
-    }
-
-    // Calculate real stats from orders
-    const totalRevenue = orders.reduce((sum, order) => sum + order.total, 0);
-    const totalOrders = orders.length;
-    const avgOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
+  try {
+    const [dashboardStats, revenueData, popularItems, categoryData, peakHours] = await Promise.all([
+      analyticsAPI.getDashboardStats(),
+      analyticsAPI.getRevenueData(30),
+      analyticsAPI.getPopularItems(10),
+      analyticsAPI.getCategoryData(),
+      analyticsAPI.getPeakHours()
+    ]);
 
     setStats({
-      totalRevenue,
-      totalOrders,
-      avgOrderValue,
-      // Use dummy data for charts
-      ...getDummyStats()
+      ...dashboardStats.stats,
+      revenueData: revenueData.data,
+      popularItems: popularItems.items,
+      categoryData: categoryData.data,
+      peakHours: peakHours.data
     });
-  };
+  } catch (error) {
+    toast.error('Failed to load analytics');
+    console.error(error);
+  } finally {
+    setLoading(false);
+  }
+};
 
-  const getDummyStats = () => {
-    return {
-      totalRevenue: 45680,
-      totalOrders: 156,
-      avgOrderValue: 293,
-      newCustomers: 42,
-      revenueGrowth: 12.5,
-      ordersGrowth: 8.3,
+  // const calculateStats = () => {
+  //   const orders = JSON.parse(sessionStorage.getItem('orders') || '[]');
+    
+  //   // Generate dummy data if no orders
+  //   if (orders.length === 0) {
+  //     setStats(getDummyStats());
+  //     return;
+  //   }
+
+  //   // Calculate real stats from orders
+  //   const totalRevenue = orders.reduce((sum, order) => sum + order.total, 0);
+  //   const totalOrders = orders.length;
+  //   const avgOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
+
+  //   setStats({
+  //     totalRevenue,
+  //     totalOrders,
+  //     avgOrderValue,
+  //     // Use dummy data for charts
+  //     ...getDummyStats()
+  //   });
+  // };
+
+  // const getDummyStats = () => {
+  //   return {
+  //     totalRevenue: 45680,
+  //     totalOrders: 156,
+  //     avgOrderValue: 293,
+  //     newCustomers: 42,
+  //     revenueGrowth: 12.5,
+  //     ordersGrowth: 8.3,
       
-      // Revenue over time (last 7 days)
-      revenueData: [
-        { date: 'Mon', revenue: 5200, orders: 18 },
-        { date: 'Tue', revenue: 6800, orders: 24 },
-        { date: 'Wed', revenue: 5600, orders: 19 },
-        { date: 'Thu', revenue: 7200, orders: 26 },
-        { date: 'Fri', revenue: 8400, orders: 31 },
-        { date: 'Sat', revenue: 9100, orders: 35 },
-        { date: 'Sun', revenue: 8200, orders: 29 }
-      ],
+  //     // Revenue over time (last 7 days)
+  //     revenueData: [
+  //       { date: 'Mon', revenue: 5200, orders: 18 },
+  //       { date: 'Tue', revenue: 6800, orders: 24 },
+  //       { date: 'Wed', revenue: 5600, orders: 19 },
+  //       { date: 'Thu', revenue: 7200, orders: 26 },
+  //       { date: 'Fri', revenue: 8400, orders: 31 },
+  //       { date: 'Sat', revenue: 9100, orders: 35 },
+  //       { date: 'Sun', revenue: 8200, orders: 29 }
+  //     ],
       
-      // Popular items
-      popularItems: [
-        { name: 'Butter Chicken', orders: 45, revenue: 15705 },
-        { name: 'Paneer Tikka', orders: 38, revenue: 11362 },
-        { name: 'Biryani', orders: 32, revenue: 9568 },
-        { name: 'Dal Makhani', orders: 28, revenue: 6972 },
-        { name: 'Naan', orders: 52, revenue: 2080 }
-      ],
+  //     // Popular items
+  //     popularItems: [
+  //       { name: 'Butter Chicken', orders: 45, revenue: 15705 },
+  //       { name: 'Paneer Tikka', orders: 38, revenue: 11362 },
+  //       { name: 'Biryani', orders: 32, revenue: 9568 },
+  //       { name: 'Dal Makhani', orders: 28, revenue: 6972 },
+  //       { name: 'Naan', orders: 52, revenue: 2080 }
+  //     ],
       
-      // Orders by category
-      categoryData: [
-        { category: 'Main Course', value: 45, color: '#218D8D' },
-        { category: 'Appetizers', value: 25, color: '#F59E0B' },
-        { category: 'Desserts', value: 18, color: '#EF4444' },
-        { category: 'Beverages', value: 12, color: '#8B5CF6' }
-      ],
+  //     // Orders by category
+  //     categoryData: [
+  //       { category: 'Main Course', value: 45, color: '#218D8D' },
+  //       { category: 'Appetizers', value: 25, color: '#F59E0B' },
+  //       { category: 'Desserts', value: 18, color: '#EF4444' },
+  //       { category: 'Beverages', value: 12, color: '#8B5CF6' }
+  //     ],
       
-      // Peak hours
-      peakHours: [
-        { hour: '12 PM', orders: 8 },
-        { hour: '1 PM', orders: 15 },
-        { hour: '2 PM', orders: 12 },
-        { hour: '7 PM', orders: 18 },
-        { hour: '8 PM', orders: 22 },
-        { hour: '9 PM', orders: 16 }
-      ]
-    };
-  };
+  //     // Peak hours
+  //     peakHours: [
+  //       { hour: '12 PM', orders: 8 },
+  //       { hour: '1 PM', orders: 15 },
+  //       { hour: '2 PM', orders: 12 },
+  //       { hour: '7 PM', orders: 18 },
+  //       { hour: '8 PM', orders: 22 },
+  //       { hour: '9 PM', orders: 16 }
+  //     ]
+  //   };
+  // };
 
   if (!stats) {
     return (
